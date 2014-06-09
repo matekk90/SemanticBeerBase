@@ -112,10 +112,6 @@ public class SemanticBeerBase extends JFrame implements ActionListener {
 		}
 		else if (source.equals(bPrintBeers))
 		{
-			// Tutaj trzeba jakoœ wyœwietlaæ w JTable trójki (firma,nazwa,styl)
-			// Musisz zobaczyæ sobie printBeers w Ontology.java - tam wszystko wyœwietlam
-			// w konsoli, trzeba to wrzuciæ do jakieœ struktury i wyœwietliæ za pomoc¹ JTable 
-			// (lub w inny sposób) byle bêdzie dzia³aæ
 				if(dodano > 0)
 				{ont.printBeers();
 			
