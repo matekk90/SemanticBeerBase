@@ -3,6 +3,8 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -16,6 +18,8 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 
 
 
@@ -32,13 +36,14 @@ public class SemanticBeerBase extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
 	static SemanticBeerBase frame;
 	static int ile = 0;
-	Container cp;
+	static int dodano = 0;
+	JScrollPane scroll;
 	/**
 	 * @param args
 	 */
 	SemanticBeerBase()
 	{
-		setSize(600,400);
+		setSize(600,500);
 		setTitle("Semantic Beer Base");
 		//FlowLayout flow = new FlowLayout();
 		setLayout(null);
@@ -71,8 +76,9 @@ public class SemanticBeerBase extends JFrame implements ActionListener {
 		bPrintBeers.setBounds(50, 100, 150, 20);
 		add(bPrintBeers);
 		bPrintBeers.addActionListener(this);
-		String [] row = {"Firma", "Nazwa piwa", "Styl"};
-		String [][] data = {{"¯ywiec", "¯ywiec Bia³e", "White"}};
+		setResizable(false);
+		//String [] row = {"Firma", "Nazwa piwa", "Styl"};
+		//String [][] data = {{"¯ywiec", "¯ywiec Bia³e", "White"}};
 		
 		
 		
@@ -102,6 +108,7 @@ public class SemanticBeerBase extends JFrame implements ActionListener {
 		{
 			ont.addBreweryBase(tBreweryBase.getText());
 			infoBox("Dodano bazê " + tBreweryBase.getText(),"Sukces");
+			dodano = 1;
 		}
 		else if (source.equals(bPrintBeers))
 		{
@@ -109,36 +116,61 @@ public class SemanticBeerBase extends JFrame implements ActionListener {
 			// Musisz zobaczyæ sobie printBeers w Ontology.java - tam wszystko wyœwietlam
 			// w konsoli, trzeba to wrzuciæ do jakieœ struktury i wyœwietliæ za pomoc¹ JTable 
 			// (lub w inny sposób) byle bêdzie dzia³aæ
-			ont.printBeers();
+				if(dodano > 0)
+				{ont.printBeers();
 			
-			if(ile > 0)
-			{
-				tBeers.setModel(null);
-				frame.getContentPane().remove(tBeers);
-				frame.getContentPane().repaint(50L);
-			}
+				if(ile > 0)
+				{
+					//pobieramy nowa strukturze drzewa po zmianach
+					tBeers.setModel(null);
+					tBeers.setModel(ont.drzewko.getModel());
+					scroll.repaint();
+				}
 			
-			
-			
-			tBeers = new JTree(ont.drzewko.getModel());
-			tBeers.setBounds(20, 130, 550, 200);
-			
-			
-			//JScrollPane treePane = new JScrollPane(tBeers);
-			//JOptionPane.showMessageDialog(null,new JScrollPane(tBeers));
-        
-			
-
-			frame.getContentPane().add(tBeers);
-			frame.getContentPane().repaint();
-			ile++;
+				else
+				{
+					tBeers = new JTree(ont.drzewko.getModel());
+					scroll = new JScrollPane(tBeers);
+					scroll.setBounds(20, 130, 540, 300);
+					frame.getContentPane().add(scroll);
+					ile++;
+				}
+					
+				
+				tBeers.expandRow(1);
+				tBeers.scrollRowToVisible(2);
+				tBeers.revalidate();
+				frame.getContentPane().repaint();
+				ont.drzewko = null;
+				}
+				else
+					JOptionPane.showMessageDialog(frame,"Nie dodano nowej bazy");
+				dodano = 0;
+				/*tBeers.addMouseListener(new MouseAdapter() {
+				      public void mouseClicked(MouseEvent me) {
+				          doMouseClicked(me);
+				        }
+				      });*/
 		}
-
+			
 	}
 	
 	private static void infoBox(String infoMessage, String location)
     {
         JOptionPane.showMessageDialog(null, infoMessage, location, JOptionPane.INFORMATION_MESSAGE);
     }
+	
+	void doMouseClicked(MouseEvent me) {
+
+        //int selRow = tBeers.getRowForLocation(me.getX(), me.getY());
+        
+	    TreePath tp = tBeers.getPathForLocation(me.getX(), me.getY());
+	    //System.out.println(tp.getParentPath().getLastPathComponent().toString());
+	    int selRow = tp.getPathCount();
+	    if (selRow > 5)
+	    	JOptionPane.showMessageDialog(frame,tp.getLastPathComponent().toString());
+	    //else
+	    	//JOptionPane.showMessageDialog(frame,"klik2");
+	  }
 
 }

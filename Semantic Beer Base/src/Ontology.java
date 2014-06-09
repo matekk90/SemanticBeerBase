@@ -72,6 +72,7 @@ public class Ontology {
 		DefaultMutableTreeNode ingredientsExample=null;
 		for (int i = 0; i < BreweryOnt.size(); i++)
 		{
+			skladnik="";
 			//System.out.println(BrewerySource.get(i));
 			/****************** Wyciagamy nazwe bazy - to nazwa firmy ****************************/
 			nameComapany = BrewerySource.get(i);
@@ -106,7 +107,7 @@ public class Ontology {
 	        	System.out.print(c.getLocalName() + " - ");
 	        	row[0] = c.getLocalName();
 	        	styleExample = new DefaultMutableTreeNode(c.getLocalName());
-	        	firmy.add(styleExample);
+	        	//firmy.add(styleExample);
 	        	/***************************************************************/
 	        	// oraz nazwê piwa/piw (instancjê klasy) danego stylu
 	        	ExtendedIterator<? extends OntResource> instances = c.listInstances();
@@ -116,13 +117,14 @@ public class Ontology {
 	        		Individual thisInstance = (Individual) instances.next();
 	        		System.out.println(thisInstance.getLocalName() + " ");
 	        		instancje = new DefaultMutableTreeNode(thisInstance.getLocalName());
-	        		styleExample.add(instancje);
+	        		firmy.add(instancje);
+	        		instancje.add(styleExample);
 	        		row[1] = thisInstance.getLocalName();
 	        	}
 	        	// oraz sk³adniki
 	        	System.out.println("Sk³adniki:");
 	        	ingredients = new DefaultMutableTreeNode("Sk³adniki");
-	        	instancje.add(ingredients);
+	        	styleExample.add(ingredients);
 	        	OntClass artefact = MainOnt.getOntClass( NS + c.getLocalName() );
 
 	        	for (Iterator<OntClass> iArtefact = artefact.listSuperClasses(); iArtefact.hasNext(); ) 
@@ -139,6 +141,8 @@ public class Ontology {
 	        	}
 	        }
 		}
+		BreweryOnt.clear();
+		
 	}
 	static String skladnik="";
 	public Boolean isMainBaseOpen()
