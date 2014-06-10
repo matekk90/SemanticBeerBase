@@ -1,6 +1,7 @@
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -8,12 +9,14 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.ontology.OntModelSpec;
 import com.hp.hpl.jena.ontology.OntProperty;
 import com.hp.hpl.jena.ontology.OntResource;
 import com.hp.hpl.jena.ontology.Restriction;
 import com.hp.hpl.jena.ontology.UnionClass;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.ResourceFactory;
 import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 
 
@@ -22,7 +25,7 @@ public class Ontology {
 	/**
 	 * @param args
 	 */
-	OntModel MainOnt = ModelFactory.createOntologyModel();;
+	OntModel MainOnt = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM_TRANS_INF);;
 	List <OntModel> BreweryOnt = new LinkedList<OntModel>();
 	String MainSource;
 	List <String> BrewerySource = new LinkedList<String>();
@@ -39,111 +42,86 @@ public class Ontology {
 	
 	public void addBreweryBase(String source)
 	{
-		OntModel BrewOnt = ModelFactory.createOntologyModel();
+		OntModel BrewOnt = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM_TRANS_INF);
 		BrewerySource.add(source + "#");
 		BrewOnt.read(source + "#");
 		BreweryOnt.add(BrewOnt);
 	}
 	
 	
-	
 	public void printBeers()
 	{
-		//List<String[]> data = new LinkedList<String[]>();
-		//tutaj tworzymy liste styli piwa poki co nie wiem skad widzalem ze na sztywno wspiales
-	
-		
 		drzewko = new JTree(root);
 		DefaultMutableTreeNode firmy = null;
 		
 		String last = " ";
-		String nameComapany = " ";
-			//style = new DefaultMutableTreeNode(beerStyles.get(i));
-			//root.add(style);
+		String nameCompany = " ";	
 		
-		
-		
-		
-		String row[] = {"0","0","0"};
-		//System.out.println("Style warzone:");
 		DefaultMutableTreeNode styleExample=null;
 		DefaultMutableTreeNode instancje=null;
 		DefaultMutableTreeNode ingredients=null;
 		DefaultMutableTreeNode ingredientsExample=null;
 		for (int i = 0; i < BreweryOnt.size(); i++)
 		{
+			
 			skladnik="";
-			//System.out.println(BrewerySource.get(i));
 			/****************** Wyciagamy nazwe bazy - to nazwa firmy ****************************/
-			nameComapany = BrewerySource.get(i);
+			nameCompany = BrewerySource.get(i);
 			
-			int start = 0;
-			int end = 0;
 			
-			for(int ii=(nameComapany.length()-1); ii>=0; ii--)
-			{
-				
-				String c =Character.toString(nameComapany.charAt(ii));
-				
-				if(start == 0)
-					if(c.equals("/"))
-						start=ii+1;
-				if(end == 0)
-					if(c.equals("."))
-						end=ii;
-			}
-			nameComapany = nameComapany.substring(start,end);
+			int start = nameCompany.lastIndexOf("/")+1;
+			int end = nameCompany.lastIndexOf(".");
+
+			nameCompany = nameCompany.substring(start,end);
 			
-			firmy = new DefaultMutableTreeNode(nameComapany);
+			firmy = new DefaultMutableTreeNode(nameCompany);
 			root.add(firmy);
 			/**************************************************************************************/
-			//String NS = BrewerySource.get(i);
-			OntClass BreweryClass = BreweryOnt.get(i).getOntClass(NS + "Beer");
-			for (Iterator<OntClass> iBrew = BreweryClass.listSubClasses(); iBrew.hasNext();) 
+			
+			OntClass BreweryClass = MainOnt.getOntClass("http://www.csd.abdn.ac.uk/research/AgentCities/ontologies/beer#Beer");
+			ExtendedIterator<OntClass> iBrew = BreweryClass.listSubClasses();
+			while ( iBrew.hasNext()) 
 	        {
 	        	OntClass c = iBrew.next();
-	        	/***** Pobieramy przyklady danego stylu i do drzewa ************/
-	        	// Wyœwietlamy nazwê klasy (stylu)
-	        	System.out.print(c.getLocalName() + " - ");
-	        	row[0] = c.getLocalName();
-	        	styleExample = new DefaultMutableTreeNode(c.getLocalName());
-	        	//firmy.add(styleExample);
-	        	/***************************************************************/
-	        	// oraz nazwê piwa/piw (instancjê klasy) danego stylu
-	        	ExtendedIterator<? extends OntResource> instances = c.listInstances();
-	        	while (instances.hasNext())
-	        	{
-	        		/** tutaj pobierana jest konkretna instancja danego stylu ***/ 
-	        		Individual thisInstance = (Individual) instances.next();
-	        		System.out.println(thisInstance.getLocalName() + " ");
-	        		instancje = new DefaultMutableTreeNode(thisInstance.getLocalName());
-	        		firmy.add(instancje);
-	        		instancje.add(styleExample);
-	        		row[1] = thisInstance.getLocalName();
-	        	}
-	        	// oraz sk³adniki
-	        	System.out.println("Sk³adniki:");
-	        	ingredients = new DefaultMutableTreeNode("Sk³adniki");
-	        	styleExample.add(ingredients);
-	        	OntClass artefact = MainOnt.getOntClass( NS + c.getLocalName() );
+	        	// Pobieramy przyklady danego stylu i do drzewa 
 
-	        	for (Iterator<OntClass> iArtefact = artefact.listSuperClasses(); iArtefact.hasNext(); ) 
-	        	{
-	        		displayType( iArtefact.next() );
-	        		/********* Pobieramy i obcinamy dany skladnik **************/
-	        		if(skladnik != "" && skladnik != last)
-	        		{
-	        			String[] parts = skladnik.split(" ");
-	        			ingredientsExample = new DefaultMutableTreeNode(parts[2]);
-	        			ingredients.add(ingredientsExample);
-	        			last = skladnik;
-	        		}
-	        	}
-	        }
-		}
+				Resource res = ResourceFactory.createResource(c.getURI());
+				
+				ExtendedIterator<Individual> ind = BreweryOnt.get(i).listIndividuals(res);
+				while (ind.hasNext())
+				{
+					String instName = ind.next().getLocalName();
+					//System.out.println("Nazwa: " + instName);
+					instancje = new DefaultMutableTreeNode(instName);
+					firmy.add(instancje);
+					//System.out.println(c.getLocalName());
+					styleExample = new DefaultMutableTreeNode(c.getLocalName());
+	        		instancje.add(styleExample);
+	        		
+					ingredients = new DefaultMutableTreeNode("Sk³adniki");
+					styleExample.add(ingredients);
+		        	OntClass artefact = MainOnt.getOntClass( NS + c.getLocalName() );
+		        	ExtendedIterator<OntClass> iArtefact = artefact.listSuperClasses();
+		        	while ( iArtefact.hasNext() ) 
+		        	{
+		        		displayType( iArtefact.next() );
+		        		// Pobieramy i obcinamy dany skladnik 
+		        		if(skladnik != "" && skladnik != last)
+		        		{
+		        			//String[] parts = skladnik.split(" ");
+		        			ingredientsExample = new DefaultMutableTreeNode(skladnik);
+		        			ingredients.add(ingredientsExample);
+		        			last = skladnik;
+		        		}
+		        	}
+				} // while (ind.hasNext())
+	        } // while ( iBrew.hasNext()) 
+		} // for (int i = 0; i < BreweryOnt.size(); i++)
 		BreweryOnt.clear();
+		BrewerySource.clear();
 		
 	}
+	
 	static String skladnik="";
 	public Boolean isMainBaseOpen()
 	{
@@ -170,9 +148,9 @@ public class Ontology {
     }
 
     protected static void displayRestriction( String qualifier, OntProperty onP, Resource constraint ) {
-        String out = String.format( "%s %s %s",
-                                    qualifier, renderURI( onP ), renderConstraint( constraint ) );
-        System.out.println( "Ingredients: " + out );
+        String out = String.format( "%s",
+                                    renderConstraint( constraint ) );
+        //System.out.println( "Ingredients: " + out );
         skladnik = out;
         
     }

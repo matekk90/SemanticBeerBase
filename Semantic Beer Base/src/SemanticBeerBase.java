@@ -7,6 +7,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -38,24 +39,26 @@ public class SemanticBeerBase extends JFrame implements ActionListener {
 	static int ile = 0;
 	static int dodano = 0;
 	JScrollPane scroll;
+	
+	JComboBox cbBreweryBase;
 	/**
 	 * @param args
 	 */
 	SemanticBeerBase()
 	{
-		setSize(600,500);
+		setSize(700,640);
 		setTitle("Semantic Beer Base");
 		//FlowLayout flow = new FlowLayout();
 		setLayout(null);
 		lMainBase = new JLabel("Adres bazy g³ównej");
 		lMainBase.setBounds(20, 10, 140, 20);
 		add(lMainBase);
-		tMainBase = new JTextField("https://dl.dropboxusercontent.com/u/87890572/beer1.4.rdf");
-		tMainBase.setBounds(150, 10, 200, 20);
+		tMainBase = new JTextField("https://dl.dropboxusercontent.com/u/87890572/beer.owl");
+		tMainBase.setBounds(150, 10, 400, 20);
 		tMainBase.setToolTipText("Adres g³ównego repozytorium");
 		add(tMainBase);
 		bAddMainBase = new JButton("Dodaj");
-		bAddMainBase.setBounds(360, 10, 70, 20);
+		bAddMainBase.setBounds(560, 10, 70, 20);
 		add(bAddMainBase);
 		bAddMainBase.addActionListener(this);
 
@@ -63,12 +66,20 @@ public class SemanticBeerBase extends JFrame implements ActionListener {
 		lBreweryBase = new JLabel("Adres bazy firmowej");
 		lBreweryBase.setBounds(20, 40, 140, 20);
 		add(lBreweryBase);
-		tBreweryBase = new JTextField("https://dl.dropboxusercontent.com/u/87890572/Zywiec.owl");
-		tBreweryBase.setBounds(150, 40, 200, 20);
-		tBreweryBase.setToolTipText("Adres firmowego repozytorium");
-		add(tBreweryBase);
+		//tBreweryBase = new JTextField("https://dl.dropboxusercontent.com/u/87890572/Zywiec.owl");
+		//tBreweryBase.setBounds(150, 40, 200, 20);
+		//tBreweryBase.setToolTipText("Adres firmowego repozytorium");
+		//add(tBreweryBase);
+		cbBreweryBase = new JComboBox();
+		cbBreweryBase.setBounds(150, 40, 400, 20);
+		cbBreweryBase.addItem("https://dl.dropboxusercontent.com/u/87890572/Zywiec.owl");
+		cbBreweryBase.addItem("https://dl.dropboxusercontent.com/u/87890572/KompaniaPiwowarska.owl");
+		cbBreweryBase.addItem("Dodaj...");
+		cbBreweryBase.setEditable(true);
+		add(cbBreweryBase);
+		cbBreweryBase.addActionListener(this);
 		bAddBreweryBase = new JButton("Dodaj");
-		bAddBreweryBase.setBounds(360, 40, 70, 20);
+		bAddBreweryBase.setBounds(560, 40, 70, 20);
 		add(bAddBreweryBase);
 		bAddBreweryBase.addActionListener(this);
 		
@@ -106,8 +117,9 @@ public class SemanticBeerBase extends JFrame implements ActionListener {
 		}
 		else if (source.equals(bAddBreweryBase))
 		{
-			ont.addBreweryBase(tBreweryBase.getText());
-			infoBox("Dodano bazê " + tBreweryBase.getText(),"Sukces");
+			String adres = cbBreweryBase.getSelectedItem().toString();
+			ont.addBreweryBase(adres);
+			infoBox("Dodano bazê " + adres,"Sukces");
 			dodano = 1;
 		}
 		else if (source.equals(bPrintBeers))
@@ -127,13 +139,13 @@ public class SemanticBeerBase extends JFrame implements ActionListener {
 				{
 					tBeers = new JTree(ont.drzewko.getModel());
 					scroll = new JScrollPane(tBeers);
-					scroll.setBounds(20, 130, 540, 300);
+					scroll.setBounds(20, 130, 650, 455);
 					frame.getContentPane().add(scroll);
 					ile++;
 				}
 					
 				
-				tBeers.expandRow(1);
+				//tBeers.expandRow(1);
 				tBeers.scrollRowToVisible(2);
 				tBeers.revalidate();
 				frame.getContentPane().repaint();
@@ -148,6 +160,7 @@ public class SemanticBeerBase extends JFrame implements ActionListener {
 				        }
 				      });*/
 		}
+
 			
 	}
 	
